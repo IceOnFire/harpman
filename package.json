@@ -1,0 +1,27 @@
+{
+  "name": "harpman",
+  "version": "0.0.0",
+  "description": "Harmonica Manager for Node",
+  "main": "harpman",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/IceOnFire/harpman"
+  },
+  "keywords": [
+    "harp",
+    "harmonica",
+    "scales"
+  ],
+  "author": "IceOnFire",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/IceOnFire/harpman/issues"
+  },
+  "dependencies": {
+    "colors": "^1.0.3",
+    "yargs": "^3.6.0"
+  }
+}
