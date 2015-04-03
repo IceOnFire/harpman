@@ -2,19 +2,22 @@
 
 var colors = require('colors');
 var argv = require('yargs')
-  .usage('Usage: $0 <command> [options]')
-  .default('h', 'C')
-  .alias('h', 'harp')
-  .describe('h', 'Harmonica tonality')
+  .usage('Usage: $0 [options]')
+  .default('k', 'C')
+  .alias('k', 'key')
+  .describe('k', 'Harmonica tonality')
   .default('s', 'heptatonic major natural')
   .alias('s', 'scale')
   .describe('s', 'A pentatonic or heptatonic scale')
   //.default('t', 'C')
   .alias('t', 'tonality')
-  .describe('Scale tonality')
+  .describe('t', 'Scale tonality')
   .default('o', '1-3')
   .describe('o', 'Octave range between 1 and 3')
   .alias('o', 'octaves')
+  .help('h')
+  .alias('h', 'help')
+  .epilog('author: IceOnFire')
   .argv;
 
 var notes = [ ' C', ' Db',  ' D', ' Eb',  ' E', ' F',  ' Gb',  ' G', ' Ab',   ' A',  ' Bb',   ' B' ];
@@ -85,20 +88,20 @@ var getNotes = function(scale, tonality, octave, octaves) {
   return theNotes;
 }
 
-var getHoles = function(harp, scale, tonality, octave, octaves) {
+var getHoles = function(harpkey, scale, tonality, octave, octaves) {
   var o, semitone, theHoles = [];
   for (o = octave; o < octaves; o += 1) {
     for (semitone = 0; semitone < scale.length; semitone += 1) {
-      theHoles.push(holes[scale[semitone] + tonalities[tonality] - tonalities[harp] + 12 * o] || ' X');
+      theHoles.push(holes[scale[semitone] + tonalities[tonality] - tonalities[harpkey] + 12 * o] || ' X');
     }
   }
-  theHoles.push(holes[scale[0] + tonalities[tonality] - tonalities[harp] + 12 * octaves] || ' X');
+  theHoles.push(holes[scale[0] + tonalities[tonality] - tonalities[harpkey] + 12 * octaves] || ' X');
   return theHoles;
 }
 
-var harp = argv.h;
+var harpkey = argv.k;
 var scale = argv.s;
-var tonality = argv.t || harp;
+var tonality = argv.t || harpkey;
 var octaves = argv.o;
 
 var tokens = scale.split(' ');
@@ -131,7 +134,7 @@ for (var i = 0; i < theNotes.length; i += 1) {
 }
 process.stdout.write('\n');
 
-var theHoles = getHoles(harp, scale, tonality, octave, octaves);
+var theHoles = getHoles(harpkey, scale, tonality, octave, octaves);
 for (var i = 0; i < theHoles.length; i += 1) {
   var theHole = theHoles[i];
   if (i % scale.length === 0) { // tonic
