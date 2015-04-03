@@ -108,9 +108,9 @@ for (var i = 0; i < tokens.length; i += 1) {
 }
 
 tokens = octaves.split('-');
-var octave = tokens[0] || 1;
+var octave = tokens[0];
 octave -= 1;
-octaves = tokens[1] || 1;
+octaves = tokens[1];
 
 /*for (var i = 0; i < degrees.length; i += 1) {
     process.stdout.write(degrees[i] + '\t');
