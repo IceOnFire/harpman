@@ -8,13 +8,15 @@ A useful command line tool for harmonica players: shows the holes you have to bl
 
 ## Options:
 
-`-h, --harp` Harmonica tonality (default 'C')
+`-k, --key` Harmonica key (default 'C')
 
-`-s, --scale` A pentatonic, hexatonic or heptatonic scale (default 'heptatonic major natural')
+`-p, --progression` Scale or chord progression (default 'scale major', see `progressions.json`)
 
-`-t, --tonality` Scale tonality (defaults to harp's tonality)
+`-t, --tonality` Progression tonality (defaults to harp's key)
 
 `-o, --octaves` Octave range between 1 and 3 (default '1-3')
+
+`-h, --help` Show this help message
 
 ## Available scales
 
