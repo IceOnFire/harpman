@@ -1,0 +1,89 @@
+#!/usr/bin/node
+
+var Fraction = require('fractional').Fraction;
+var colors = require('colors');
+var argv = require('yargs')
+  .usage('Usage: $0 [options]')
+  .alias('k', 'key').describe('k', 'Harmonica key').default('k', 'C')
+  .alias('p', 'progression').describe('p', 'Scale or chord progression').default('p', 'scale major')
+  .alias('t', 'tonality').describe('t', 'Progression tonality')//.default('t', 'C')
+  .alias('o', 'octaves').describe('o', 'Octave range between 1 and 3').default('o', '1-3')
+  .help('h').alias('h', 'help')
+  .epilog('author: IceOnFire')
+  .argv;
+
+var harpman = require('../harpman');
+console.log(harpman);
+var progressions = require('../data/progressions.json');
+
+var harpkey = argv.k;
+var progression = argv.p;
+var tonality = argv.t || harpkey;
+var octaves = argv.o;
+
+var tokens = progression.split(' ');
+progression = progressions;
+for (var i = 0; i < tokens.length; i += 1) {
+  progression = progression[tokens[i]];
+}
+
+tokens = octaves.split('-');
+var octave = tokens[0];
+octave -= 1;
+octaves = tokens[1];
+
+process.stdout.write('intv\t');
+var theIntervals = harpman.getIntervals(progression, octave, octaves);
+for (var i = 0; i < theIntervals.length; i += 1) {
+  var theInterval = theIntervals[i];
+  if (theInterval % 1 === 0) {
+    theInterval = '     ' + theInterval;
+  } else if (theInterval / 1 - theInterval % 1 <= 0) {
+    theInterval = '    ' + new Fraction(theInterval).toString();
+  } else {
+    theInterval = '  ' + new Fraction(theInterval).toString();
+  }
+  process.stdout.write(theInterval + '\t');
+}
+process.stdout.write('\n');
+
+process.stdout.write('step\t');
+var theSteps = harpman.getSteps(progression, octave, octaves);
+for (var i = 0; i < theSteps.length; i += 1) {
+  process.stdout.write(theSteps[i] + '\t');
+}
+process.stdout.write('\n');
+
+process.stdout.write('note\t');
+var theNotes = harpman.getNotes(progression, tonality, octave, octaves);
+for (var i = 0; i < theNotes.length; i += 1) {
+  var theNote = theNotes[i];
+  if (i % progression.length === 0) { // tonic
+    theNote = colors.green.bold(theNote);
+  } else if ((i % progression.length) % 6 === 0) { // leading
+    theNote = colors.magenta.bold(theNote);
+  } else if ((i % progression.length) % 4 === 0) { // dominant
+    theNote = colors.blue.bold(theNote);
+  } else if ((i % progression.length) % 2 === 0) { // mediant
+    theNote = colors.yellow.dim(theNote);
+  }
+  process.stdout.write(theNote + '\t');
+}
+process.stdout.write('\n');
+
+process.stdout.write('hole\t');
+var theHoles = harpman.getHoles(harpkey, progression, tonality, octave, octaves);
+for (var i = 0; i < theHoles.length; i += 1) {
+  var theHole = theHoles[i];
+  if (i % progression.length === 0) { // tonic
+    theHole = colors.green.bold(theHole);
+  } else if ((i % progression.length) % 6 === 0) { // leading
+    theHole = colors.magenta.bold(theHole);
+  } else if ((i % progression.length) % 4 === 0) { // dominant
+    theHole = colors.blue.bold(theHole);
+  } else if ((i % progression.length) % 2 === 0) { // mediant
+    theHole = colors.yellow.dim(theHole);
+  }
+  process.stdout.write(theHole + '\t');
+}
+process.stdout.write('\n');
