@@ -1,5 +1,6 @@
 #!/usr/bin/node
 
+var Fraction = require('fractional').Fraction;
 var colors = require('colors');
 var argv = require('yargs')
   .usage('Usage: $0 [options]')
@@ -67,7 +68,7 @@ var progressions = {
     maj11 : [ 0, 4, 7, 11, 13, 15 ],
     maj13 : [ 0, 4, 7, 11, 13, 15, 17 ],
     6 : [ 0, 4, 7, 10 ],
-    add9 : [0, 4, 7, 13 ]
+    add9 : [ 0, 4, 7, 13 ]
   }
 };
 
@@ -87,6 +88,17 @@ var tonalities = {
 }
 
 var degrees = [ 'tonic', 'supertonic', 'mediant', 'subdominant', 'dominant', 'submediant', 'leading' ];
+
+var getSteps = function(progression, octave, octaves) {
+  var o, semitone, theSteps = [];
+  for (o = octave; o < octaves; o += 1) {
+    for (semitone = 0; semitone < progression.length - 1; semitone += 1) {
+      theSteps.push((progression[semitone + 1] - progression[semitone]) / 2);
+    }
+    theSteps.push((progression[0] + 12 - progression[progression.length - 1]) / 2);
+  }
+  return theSteps;
+}
 
 var getNotes = function(progression, tonality, octave, octaves) {
   var o, semitone, theNotes = [];
@@ -125,6 +137,18 @@ tokens = octaves.split('-');
 var octave = tokens[0];
 octave -= 1;
 octaves = tokens[1];
+
+var theSteps = getSteps(progression, octave, octaves);
+for (var i = 0; i< theSteps.length; i += 1) {
+  var theStep = theSteps[i];
+  if (theStep % 1 === 0) {
+    theStep = '     ' + theStep;
+  } else {
+    theStep = '    ' + new Fraction(theStep).toString();
+  }
+  process.stdout.write(theStep + '\t');
+}
+process.stdout.write('\n');
 
 var theNotes = getNotes(progression, tonality, octave, octaves);
 for (var i = 0; i < theNotes.length; i += 1) {
