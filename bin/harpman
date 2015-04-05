@@ -35,53 +35,51 @@ for token in tokens
   progression = progression[token]
 
 tokens = octaves.split '-'
-octave = tokens[0]
-octave -= 1
+octave = tokens[0] - 1
 octaves = tokens[1]
 
 process.stdout.write 'intv\t'
-theIntervals = harpman.getIntervals progression, octave, octaves
-
-for theInterval in theIntervals
-  if theInterval % 1 is 0
-    theInterval = '     ' + theInterval
-  else if theInterval / 1 - theInterval % 1 <= 0
-    theInterval = '    ' + new Fraction(theInterval).toString()
+intervals = harpman.getIntervals progression, octave, octaves
+for interval in intervals
+  if interval % 1 is 0
+    interval = '     ' + interval
+  else if interval / 1 - interval % 1 <= 0
+    interval = '    ' + new Fraction(interval).toString()
   else
-    theInterval = '  ' + new Fraction(theInterval).toString()
-  process.stdout.write theInterval + '\t'
+    interval = '  ' + new Fraction(interval).toString()
+  process.stdout.write interval + '\t'
 process.stdout.write '\n'
 
 process.stdout.write 'step\t'
-theSteps = harpman.getSteps progression, octave, octaves
-for step in theSteps
+steps = harpman.getSteps progression, octave, octaves
+for step in steps
   process.stdout.write step + '\t'
 process.stdout.write '\n'
 
 process.stdout.write 'note\t'
-theNotes = harpman.getNotes progression, tonality, octave, octaves
-for theNote, i in theNotes
+notes = harpman.getNotes progression, tonality, octave, octaves
+for note, i in notes
   if i % progression.length is 0 # tonic
-    theNote = colors.green.bold theNote
+    note = colors.green.bold note
   else if (i % progression.length) % 6 is 0 # leading
-    theNote = colors.magenta.bold theNote
+    note = colors.magenta.bold note
   else if (i % progression.length) % 4 is 0 # dominant
-    theNote = colors.blue.bold theNote
+    note = colors.blue.bold note
   else if (i % progression.length) % 2 is 0 # mediant
-    theNote = colors.yellow.dim theNote
-  process.stdout.write theNote + '\t'
+    note = colors.yellow.dim note
+  process.stdout.write note + '\t'
 process.stdout.write '\n'
 
 process.stdout.write 'hole\t'
-theHoles = harpman.getHoles harpkey, progression, tonality, octave, octaves
-for theHole, i in theHoles
+holes = harpman.getHoles harpkey, progression, tonality, octave, octaves
+for hole, i in holes
   if i % progression.length is 0 # tonic
-    theHole = colors.green.bold theHole
+    hole = colors.green.bold hole
   else if (i % progression.length) % 6 is 0 # leading
-    theHole = colors.magenta.bold theHole
+    hole = colors.magenta.bold hole
   else if (i % progression.length) % 4 is 0 # dominant
-    theHole = colors.blue.bold theHole
+    hole = colors.blue.bold hole
   else if (i % progression.length) % 2 is 0 # mediant
-    theHole = colors.yellow.dim theHole
-  process.stdout.write theHole + '\t'
+    hole = colors.yellow.dim hole
+  process.stdout.write hole + '\t'
 process.stdout.write '\n'
