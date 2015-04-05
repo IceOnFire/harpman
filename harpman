@@ -28,6 +28,8 @@ var holes = [ ' 1', '-1\'', '-1', ' X',   ' 2', '-2"', '-2\'', '-2', '-3"\'', '-
               ' 7', '-7\'', '-8', ' 8\'', ' 8', '-9',  ' 9\'', ' 9', ' X',    '-10', '-10\'', ' 10\'',
               ' 10' ];
 
+var steps = [ ' 1', ' 2b', ' 2', ' 2b', ' 3', ' 4', ' 5b', ' 5', ' 6b', ' 6', ' 7b', ' 7', ' 8', ' 9b', ' 9' , ' 10', ' 10b', ' 11' ];
+
 var progressions = {
   scale : {
     pentatonic : {
@@ -35,7 +37,7 @@ var progressions = {
       major : [ 0, 2, 4, 7, 9 ]
     },
     hexatonic : {
-      blues : [ 0, 3, 5, 6, 7, 10 ] // derived from minor
+      blues : [ 0, 3, 5, 6, 7, 10 ] // derived from penta minor
     },
     heptatonic : {
       diatonic : {
@@ -58,17 +60,26 @@ var progressions = {
       major : {
         natural : [ 0, 2, 4, 5, 7, 9, 11 ], // ionian
       },
-      blues : [ 0, 3, 5, 6, 7, 10, 11 ] // one more note
+      blues : [ 0, 3, 5, 6, 7, 10, 11 ] // derived from hexa blues
     },
   },
   chord : {
-    major : [ 0, 4, 7 ],
-    maj7 : [ 0, 4, 7, 11 ],
-    maj9 : [ 0, 4, 7, 11, 13 ],
-    maj11 : [ 0, 4, 7, 11, 13, 15 ],
-    maj13 : [ 0, 4, 7, 11, 13, 15, 17 ],
-    6 : [ 0, 4, 7, 10 ],
-    add9 : [ 0, 4, 7, 13 ]
+    major :      [ 0, 4, 7 ],
+    major7 :     [ 0, 4, 7, 11 ],
+    major9 :     [ 0, 4, 7, 11, 13 ],
+    major11 :    [ 0, 4, 7, 11, 13, 15 ],
+    major13 :    [ 0, 4, 7, 11, 13, 15, 17 ],
+    major6 :     [ 0, 4, 7, 10 ],
+    majoradd9 :  [ 0, 4, 7, 13 ],
+    major6add9 : [ 0, 4, 7, 10, 13 ],
+    minor :      [ 0, 3, 7 ],
+    minor7 :     [ 0, 3, 7, 10 ],
+    minor9 :     [ 0, 3, 7, 10, 13 ],
+    minor11 :    [ 0, 3, 7, 10, 13, 15 ],
+    minor13 :    [ 0, 3, 7, 10, 13, 15, 17 ],
+    minor6 :     [ 0, 3, 7, 9 ],
+    minoradd9 :  [ 0, 3, 7, 13 ],
+    minor6add9 : [ 0, 3, 7, 9, 13 ]
   }
 };
 
@@ -89,22 +100,33 @@ var tonalities = {
 
 var degrees = [ 'tonic', 'supertonic', 'mediant', 'subdominant', 'dominant', 'submediant', 'leading' ];
 
-var getSteps = function(progression, octave, octaves) {
-  var o, semitone, theSteps = [];
+var getIntervals = function(progression, octave, octaves) {
+  var o, i, theIntervals = [];
   for (o = octave; o < octaves; o += 1) {
-    for (semitone = 0; semitone < progression.length - 1; semitone += 1) {
-      theSteps.push((progression[semitone + 1] - progression[semitone]) / 2);
+    for (i = 0; i < progression.length - 1; i += 1) {
+      theIntervals.push((progression[i + 1] - progression[i]) / 2);
     }
-    theSteps.push((progression[0] + 12 - progression[progression.length - 1]) / 2);
+    theIntervals.push((progression[0] + 12 - progression[progression.length - 1]) / 2);
   }
+  return theIntervals;
+}
+
+var getSteps = function(progression, octave, octaves) {
+  var o, i, theSteps = [];
+  for (o = octave; o < octaves; o += 1) {
+    for (i = 0; i < progression.length; i += 1) {
+      theSteps.push(steps[progression[i]]);
+    }
+  }
+  theSteps.push(steps[0]);
   return theSteps;
 }
 
 var getNotes = function(progression, tonality, octave, octaves) {
-  var o, semitone, theNotes = [];
+  var o, i, theNotes = [];
   for (o = octave; o < octaves; o += 1) {
-    for (semitone = 0; semitone < progression.length; semitone += 1) {
-      theNotes.push(notes[(progression[semitone] + tonalities[tonality]) % 12] || ' X');
+    for (i = 0; i < progression.length; i += 1) {
+      theNotes.push(notes[(progression[i] + tonalities[tonality]) % 12] || ' X');
     }
   }
   theNotes.push(notes[(progression[0] + tonalities[tonality]) % 12] || ' X');
@@ -112,10 +134,10 @@ var getNotes = function(progression, tonality, octave, octaves) {
 }
 
 var getHoles = function(harpkey, progression, tonality, octave, octaves) {
-  var o, semitone, theHoles = [];
+  var o, i, theHoles = [];
   for (o = octave; o < octaves; o += 1) {
-    for (semitone = 0; semitone < progression.length; semitone += 1) {
-      theHoles.push(holes[progression[semitone] + tonalities[tonality] - tonalities[harpkey] + 12 * o] || ' X');
+    for (i = 0; i < progression.length; i += 1) {
+      theHoles.push(holes[progression[i] + tonalities[tonality] - tonalities[harpkey] + 12 * o] || ' X');
     }
   }
   theHoles.push(holes[progression[0] + tonalities[tonality] - tonalities[harpkey] + 12 * octaves] || ' X');
@@ -138,18 +160,29 @@ var octave = tokens[0];
 octave -= 1;
 octaves = tokens[1];
 
-var theSteps = getSteps(progression, octave, octaves);
-for (var i = 0; i< theSteps.length; i += 1) {
-  var theStep = theSteps[i];
-  if (theStep % 1 === 0) {
-    theStep = '     ' + theStep;
+process.stdout.write('intv\t');
+var theIntervals = getIntervals(progression, octave, octaves);
+for (var i = 0; i < theIntervals.length; i += 1) {
+  var theInterval = theIntervals[i];
+  if (theInterval % 1 === 0) {
+    theInterval = '     ' + theInterval;
+  } else if (theInterval / 1 - theInterval % 1 <= 0) {
+    theInterval = '    ' + new Fraction(theInterval).toString();
   } else {
-    theStep = '    ' + new Fraction(theStep).toString();
+    theInterval = '  ' + new Fraction(theInterval).toString();
   }
-  process.stdout.write(theStep + '\t');
+  process.stdout.write(theInterval + '\t');
 }
 process.stdout.write('\n');
 
+process.stdout.write('step\t');
+var theSteps = getSteps(progression, octave, octaves);
+for (var i = 0; i < theSteps.length; i += 1) {
+  process.stdout.write(theSteps[i] + '\t');
+}
+process.stdout.write('\n');
+
+process.stdout.write('note\t');
 var theNotes = getNotes(progression, tonality, octave, octaves);
 for (var i = 0; i < theNotes.length; i += 1) {
   var theNote = theNotes[i];
@@ -164,6 +197,7 @@ for (var i = 0; i < theNotes.length; i += 1) {
 }
 process.stdout.write('\n');
 
+process.stdout.write('hole\t');
 var theHoles = getHoles(harpkey, progression, tonality, octave, octaves);
 for (var i = 0; i < theHoles.length; i += 1) {
   var theHole = theHoles[i];
