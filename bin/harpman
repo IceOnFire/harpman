@@ -50,36 +50,31 @@ for interval in intervals
   process.stdout.write interval + '\t'
 process.stdout.write '\n'
 
+print = (string, i, size) ->
+  if i % size is 0 # tonic
+    string = colors.green.bold string
+  else if (i % size) % 6 is 0 # leading
+    string = colors.magenta.bold string
+  else if (i % size) % 4 is 0 # dominant
+    string = colors.blue.bold string
+  else if (i % size) % 2 is 0 # mediant
+    string = colors.yellow.dim string
+  process.stdout.write string + '\t'
+
 process.stdout.write 'step\t'
 steps = harpman.getSteps progression, octave, octaves
-for step in steps
-  process.stdout.write step + '\t'
+for step, i in steps
+  print step, i, progression.length
 process.stdout.write '\n'
 
 process.stdout.write 'note\t'
 notes = harpman.getNotes progression, tonality, octave, octaves
 for note, i in notes
-  if i % progression.length is 0 # tonic
-    note = colors.green.bold note
-  else if (i % progression.length) % 6 is 0 # leading
-    note = colors.magenta.bold note
-  else if (i % progression.length) % 4 is 0 # dominant
-    note = colors.blue.bold note
-  else if (i % progression.length) % 2 is 0 # mediant
-    note = colors.yellow.dim note
-  process.stdout.write note + '\t'
+  print note, i, progression.length
 process.stdout.write '\n'
 
 process.stdout.write 'hole\t'
 holes = harpman.getHoles harpkey, progression, tonality, octave, octaves
 for hole, i in holes
-  if i % progression.length is 0 # tonic
-    hole = colors.green.bold hole
-  else if (i % progression.length) % 6 is 0 # leading
-    hole = colors.magenta.bold hole
-  else if (i % progression.length) % 4 is 0 # dominant
-    hole = colors.blue.bold hole
-  else if (i % progression.length) % 2 is 0 # mediant
-    hole = colors.yellow.dim hole
-  process.stdout.write hole + '\t'
+  print hole, i, progression.length
 process.stdout.write '\n'
