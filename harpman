@@ -6,9 +6,9 @@ var argv = require('yargs')
   .default('k', 'C')
   .alias('k', 'key')
   .describe('k', 'Harmonica tonality')
-  .default('s', 'heptatonic major natural')
-  .alias('s', 'scale')
-  .describe('s', 'A pentatonic or heptatonic scale')
+  .default('p', 'scale heptatonic major natural')
+  .alias('p', 'progression')
+  .describe('p', 'scale or chord progression')
   //.default('t', 'C')
   .alias('t', 'tonality')
   .describe('t', 'Scale tonality')
@@ -27,36 +27,47 @@ var holes = [ ' 1', '-1\'', '-1', ' X',   ' 2', '-2"', '-2\'', '-2', '-3"\'', '-
               ' 7', '-7\'', '-8', ' 8\'', ' 8', '-9',  ' 9\'', ' 9', ' X',    '-10', '-10\'', ' 10\'',
               ' 10' ];
 
-var scales = {
-  pentatonic : {
-    minor : [ 0, 3, 5, 7, 10 ],
-    major : [ 0, 2, 4, 7, 9 ]
+var progressions = {
+  scale : {
+    pentatonic : {
+      minor : [ 0, 3, 5, 7, 10 ],
+      major : [ 0, 2, 4, 7, 9 ]
+    },
+    hexatonic : {
+      blues : [ 0, 3, 5, 6, 7, 10 ] // derived from minor
+    },
+    heptatonic : {
+      diatonic : {
+        ionian :     [ 0, 2, 4, 5, 7, 9, 11 ],
+        dorian :     [ 0, 2, 3, 5, 7, 9, 10 ],
+        phrygian :   [ 0, 1, 3, 5, 7, 8, 10 ],
+        lydian :     [ 0, 2, 4, 6, 7, 9, 11 ],
+        mixolydian : [ 0, 2, 4, 5, 7, 9, 10 ],
+        aeolian :    [ 0, 2, 3, 5, 7, 8, 10 ],
+        locrian :    [ 0, 1, 3, 5, 6, 8, 10 ]
+      },
+      minor : {
+        natural :  [ 0, 2, 3, 5, 7, 8, 10 ], // aeolian
+        harmonic : [ 0, 2, 3, 5, 7, 8, 11 ],
+        melodic : {
+          ascending :  [ 0, 2, 3, 5, 7, 9, 11 ],
+          descending : [ 0, 2, 3, 5, 7, 8, 10 ] // aeolian
+        }
+      },
+      major : {
+        natural : [ 0, 2, 4, 5, 7, 9, 11 ], // ionian
+      },
+      blues : [ 0, 3, 5, 6, 7, 10, 11 ] // one more note
+    },
   },
-  hexatonic : {
-    blues : [ 0, 3, 5, 6, 7, 10 ] // derived from minor
-  },
-  heptatonic : {
-    diatonic : {
-      ionian :     [ 0, 2, 4, 5, 7, 9, 11 ],
-      dorian :     [ 0, 2, 3, 5, 7, 9, 10 ],
-      phrygian :   [ 0, 1, 3, 5, 7, 8, 10 ],
-      lydian :     [ 0, 2, 4, 6, 7, 9, 11 ],
-      mixolydian : [ 0, 2, 4, 5, 7, 9, 10 ],
-      aeolian :    [ 0, 2, 3, 5, 7, 8, 10 ],
-      locrian :    [ 0, 1, 3, 5, 6, 8, 10 ]
-    },
-    minor : {
-      natural :  [ 0, 2, 3, 5, 7, 8, 10 ], // aeolian
-      harmonic : [ 0, 2, 3, 5, 7, 8, 11 ],
-      melodic : {
-        ascending :  [ 0, 2, 3, 5, 7, 9, 11 ],
-        descending : [ 0, 2, 3, 5, 7, 8, 10 ] // aeolian
-      }
-    },
-    major : {
-      natural : [ 0, 2, 4, 5, 7, 9, 11 ] // ionian
-    },
-    blues : [ 0, 3, 5, 6, 7, 10, 11 ] // one more note
+  chord : {
+    major : [ 0, 4, 7 ],
+    maj7 : [ 0, 4, 7, 11 ],
+    maj9 : [ 0, 4, 7, 11, 13 ],
+    maj11 : [ 0, 4, 7, 11, 13, 15 ],
+    maj13 : [ 0, 4, 7, 11, 13, 15, 17 ],
+    6 : [ 0, 4, 7, 10 ],
+    add9 : [0, 4, 7, 13 ]
   }
 };
 
@@ -77,37 +88,37 @@ var tonalities = {
 
 var degrees = [ 'tonic', 'supertonic', 'mediant', 'subdominant', 'dominant', 'submediant', 'leading' ];
 
-var getNotes = function(scale, tonality, octave, octaves) {
+var getNotes = function(progression, tonality, octave, octaves) {
   var o, semitone, theNotes = [];
   for (o = octave; o < octaves; o += 1) {
-    for (semitone = 0; semitone < scale.length; semitone += 1) {
-      theNotes.push(notes[(scale[semitone] + tonalities[tonality]) % 12] || ' X');
+    for (semitone = 0; semitone < progression.length; semitone += 1) {
+      theNotes.push(notes[(progression[semitone] + tonalities[tonality]) % 12] || ' X');
     }
   }
-  theNotes.push(notes[(scale[0] + tonalities[tonality]) % 12] || ' X');
+  theNotes.push(notes[(progression[0] + tonalities[tonality]) % 12] || ' X');
   return theNotes;
 }
 
-var getHoles = function(harpkey, scale, tonality, octave, octaves) {
+var getHoles = function(harpkey, progression, tonality, octave, octaves) {
   var o, semitone, theHoles = [];
   for (o = octave; o < octaves; o += 1) {
-    for (semitone = 0; semitone < scale.length; semitone += 1) {
-      theHoles.push(holes[scale[semitone] + tonalities[tonality] - tonalities[harpkey] + 12 * o] || ' X');
+    for (semitone = 0; semitone < progression.length; semitone += 1) {
+      theHoles.push(holes[progression[semitone] + tonalities[tonality] - tonalities[harpkey] + 12 * o] || ' X');
     }
   }
-  theHoles.push(holes[scale[0] + tonalities[tonality] - tonalities[harpkey] + 12 * octaves] || ' X');
+  theHoles.push(holes[progression[0] + tonalities[tonality] - tonalities[harpkey] + 12 * octaves] || ' X');
   return theHoles;
 }
 
 var harpkey = argv.k;
-var scale = argv.s;
+var progression = argv.p;
 var tonality = argv.t || harpkey;
 var octaves = argv.o;
 
-var tokens = scale.split(' ');
-scale = scales;
+var tokens = progression.split(' ');
+progression = progressions;
 for (var i = 0; i < tokens.length; i += 1) {
-  scale = scale[tokens[i]];
+  progression = progression[tokens[i]];
 }
 
 tokens = octaves.split('-');
@@ -115,33 +126,28 @@ var octave = tokens[0];
 octave -= 1;
 octaves = tokens[1];
 
-/*for (var i = 0; i < degrees.length; i += 1) {
-    process.stdout.write(degrees[i] + '\t');
-}
-process.stdout.write('\n');*/
-
-var theNotes = getNotes(scale, tonality, octave, octaves);
+var theNotes = getNotes(progression, tonality, octave, octaves);
 for (var i = 0; i < theNotes.length; i += 1) {
   var theNote = theNotes[i];
-  if (i % scale.length === 0) { // tonic
+  if (i % progression.length === 0) { // tonic
     theNote = colors.green.bold(theNote);
-  } else if ((i % scale.length) % 4 === 0) { // dominant
+  } else if ((i % progression.length) % 4 === 0) { // dominant
     theNote = colors.blue.bold(theNote);
-  } else if ((i % scale.length) % 6 === 0) { // leading
+  } else if ((i % progression.length) % 6 === 0) { // leading
     theNote = colors.magenta.bold(theNote);
   }
   process.stdout.write(theNote + '\t');
 }
 process.stdout.write('\n');
 
-var theHoles = getHoles(harpkey, scale, tonality, octave, octaves);
+var theHoles = getHoles(harpkey, progression, tonality, octave, octaves);
 for (var i = 0; i < theHoles.length; i += 1) {
   var theHole = theHoles[i];
-  if (i % scale.length === 0) { // tonic
+  if (i % progression.length === 0) { // tonic
     theHole = colors.green.bold(theHole);
-  } else if ((i % scale.length) % 4 === 0) { // dominant
+  } else if ((i % progression.length) % 4 === 0) { // dominant
     theHole = colors.blue.bold(theHole);
-  } else if ((i % scale.length) % 6 === 0) { // leading
+  } else if ((i % progression.length) % 6 === 0) { // leading
     theHole = colors.magenta.bold(theHole);
   }
   process.stdout.write(theHole + '\t');
