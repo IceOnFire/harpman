@@ -24,6 +24,16 @@ argv = require 'yargs'
 harpman = require '../harpman'
 progressions = (require 'cson').requireFile 'data/progressions.cson'
 
+print = (string, i, size) ->
+  position = i % size
+  string = switch
+    when position is 0 then colors.green.bold string # tonic
+    when position % 6 is 0 then colors.magenta.bold string # leading
+    when position % 4 is 0 then colors.blue.bold string # dominant
+    when position % 2 is 0 then colors.yellow.dim string # mediant
+    else string
+  process.stdout.write "#{string}\t"
+
 harpkey = argv.k
 progression = argv.p
 tonality = argv.t or harpkey
@@ -31,51 +41,32 @@ octaves = argv.o
 
 tokens = progression.split ' '
 progression = progressions
-for token in tokens
-  progression = progression[token]
+progression = progression[token] for token in tokens
 
-tokens = octaves.split '-'
-octave = tokens[0] - 1
-octaves = tokens[1]
+[octave, octaves] = octaves.split '-'
+octave -= 1
 
 process.stdout.write "intv\t"
 intervals = harpman.getIntervals progression, octave, octaves
 for interval in intervals
-  if interval % 1 is 0
-    interval = "     #{interval}"
-  else if interval // 1 is 0
-    interval = "    #{new Fraction(interval).toString()}"
-  else
-    interval = "  #{new Fraction(interval).toString()}"
+  interval = switch
+    when interval % 1 is 0 then "     #{interval}"
+    when interval // 1 is 0 then "    #{new Fraction(interval).toString()}"
+    else "  #{new Fraction(interval).toString()}"
   process.stdout.write "#{interval}\t"
 process.stdout.write "\n"
 
-print = (string, i, size) ->
-  position = i % size
-  if position is 0 # tonic
-    string = colors.green.bold string
-  else if position % 6 is 0 # leading
-    string = colors.magenta.bold string
-  else if position % 4 is 0 # dominant
-    string = colors.blue.bold string
-  else if position % 2 is 0 # mediant
-    string = colors.yellow.dim string
-  process.stdout.write "#{string}\t"
-
 process.stdout.write "step\t"
 steps = harpman.getSteps progression, octave, octaves
-for step, i in steps
-  print step, i, progression.length
+print step, i, progression.length for step, i in steps
 process.stdout.write "\n"
 
 process.stdout.write "note\t"
 notes = harpman.getNotes progression, tonality, octave, octaves
-for note, i in notes
-  print note, i, progression.length
+print note, i, progression.length for note, i in notes
 process.stdout.write "\n"
 
 process.stdout.write "hole\t"
 holes = harpman.getHoles harpkey, progression, tonality, octave, octaves
-for hole, i in holes
-  print hole, i, progression.length
+print hole, i, progression.length for hole, i in holes
 process.stdout.write "\n"
