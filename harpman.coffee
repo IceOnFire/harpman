@@ -26,16 +26,16 @@ harpman.getNotes = (progression, tonality, octave, octaves) ->
   theNotes = []
   for o in [octave...octaves]
     for semitone in progression
-      theNotes.push notes[(semitone + keys[tonality]) % 12] || ' X'
-  theNotes.push notes[(progression[0] + keys[tonality]) % 12] || ' X'
+      theNotes.push notes[(semitone + keys[tonality]) % 12] or ' X'
+  theNotes.push notes[(progression[0] + keys[tonality]) % 12] or ' X'
   return theNotes
 
 harpman.getHoles = (harpkey, progression, key, octave, octaves) ->
   holes = []
   for o in [octave...octaves]
     for semitone in progression
-      holes.push harp[semitone + keys[key] - keys[harpkey] + 12 * o] || ' X'
-  holes.push harp[progression[0] + keys[key] - keys[harpkey] + 12 * octaves] || ' X'
+      holes.push harp[semitone + keys[key] - keys[harpkey] + 12 * o] or ' X'
+  holes.push harp[progression[0] + keys[key] - keys[harpkey] + 12 * octaves] or ' X'
   return holes
 
 module.exports = harpman
