@@ -1,5 +1,9 @@
 #!/usr/local/bin/coffee
 
+CSON = require 'cson'
+stepNames = CSON.requireFile 'data/steps.cson'
+progressions = CSON.requireFile 'data/progressions.cson'
+harpman = require '../harpman'
 Fraction = (require 'fractional').Fraction
 colors = require 'colors'
 argv = require 'yargs'
@@ -21,16 +25,12 @@ argv = require 'yargs'
   .epilog 'author: IceOnFire'
   .argv
 
-harpman = require '../harpman'
-progressions = (require 'cson').requireFile 'data/progressions.cson'
-
-print = (string, i, size) ->
-  position = i % size
+print = (string, step = string) ->
   string = switch
-    when position is 0 then colors.green.bold string # tonic
-    when position % 6 is 0 then colors.magenta.bold string # leading
-    when position % 4 is 0 then colors.blue.bold string # dominant
-    when position % 2 is 0 then colors.yellow.dim string # mediant
+    when step is stepNames[0] then colors.green.bold string # tonic
+    when step in stepNames[3..4] then colors.yellow.dim string # mediant
+    when step in stepNames[6..7] then colors.blue.bold string # dominant
+    when step in stepNames[10..11] then colors.magenta.bold string # leading
     else string
   process.stdout.write "#{string}\t"
 
@@ -58,15 +58,15 @@ process.stdout.write "\n"
 
 process.stdout.write "step\t"
 steps = harpman.getSteps progression, octave, octaves
-print step, i, progression.length for step, i in steps
+print step for step in steps
 process.stdout.write "\n"
 
 process.stdout.write "note\t"
 notes = harpman.getNotes progression, tonality, octave, octaves
-print note, i, progression.length for note, i in notes
+print note, steps[i] for note, i in notes
 process.stdout.write "\n"
 
 process.stdout.write "hole\t"
 holes = harpman.getHoles harpkey, progression, tonality, octave, octaves
-print hole, i, progression.length for hole, i in holes
+print hole, steps[i] for hole, i in holes
 process.stdout.write "\n"
