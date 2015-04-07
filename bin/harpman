@@ -57,14 +57,14 @@ notes = () ->
   notes = harpman.getNotes progression, tonality, octave, octaves
   print note, steps[i] for note, i in notes
   process.stdout.write "\n"
-  return
+  notes
 
 holes = () ->
   process.stdout.write "hole\t"
   holes = harpman.getHoles harpkey, progression, tonality, octave, octaves
   print hole, steps[i] for hole, i in holes
   process.stdout.write "\n"
-  return
+  holes
 
 intervals = () ->
   Fraction = (require 'fractional').Fraction
@@ -75,9 +75,6 @@ intervals = () ->
     interval = (new Fraction interval).toString()
     process.stdout.write "#{pad interval, 7, 'LEFT'}\t"
   process.stdout.write "\n"
-  return
+  intervals
 
-steps()
-notes()
-holes()
-intervals()
+steps() and notes() and holes() and intervals()
