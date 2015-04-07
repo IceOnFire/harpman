@@ -1,9 +1,5 @@
 #!/usr/local/bin/coffee
-
-CSON = require 'cson'
-stepNames = CSON.requireFile 'data/steps.cson'
-harpman = require '../harpman'
-colors = require 'colors'
+harpmanCli = require '../harpman-cli'
 argv = require 'yargs'
   .usage 'Usage: $0 [options]'
   .alias 'k', 'key'
@@ -23,58 +19,13 @@ argv = require 'yargs'
   .epilog 'author: IceOnFire'
   .argv
 
-print = (string, step = string) ->
-  string = switch
-    when step is stepNames[0] then colors.green.bold string # tonic
-    when step in stepNames[3..4] then colors.yellow.dim string # mediant
-    when step in stepNames[6..7] then colors.blue.bold string # dominant
-    when step in stepNames[10..11] then colors.magenta.bold string # leading
-    else string
-  process.stdout.write "#{string}\t"
-
 harpkey = argv.k
-progression = argv.p.split ' '
+progression = harpmanCli.progression argv.p
 tonality = argv.t or harpkey
 [octave, octaves] = argv.o.split '-'
 octave -= 1
 
-progression = do ->
-  progressions = CSON.requireFile 'data/progressions.cson'
-  tokens = progression
-  progression = progressions
-  progression = progression[token] for token in tokens
-  progression
-
-steps = () ->
-  process.stdout.write "step\t"
-  steps = harpman.getSteps progression, octave, octaves
-  print step for step in steps
-  process.stdout.write "\n"
-  steps
-
-notes = () ->
-  process.stdout.write "note\t"
-  notes = harpman.getNotes progression, tonality, octave, octaves
-  print note, steps[i] for note, i in notes
-  process.stdout.write "\n"
-  notes
-
-holes = () ->
-  process.stdout.write "hole\t"
-  holes = harpman.getHoles harpkey, progression, tonality, octave, octaves
-  print hole, steps[i] for hole, i in holes
-  process.stdout.write "\n"
-  holes
-
-intervals = () ->
-  Fraction = (require 'fractional').Fraction
-  pad = require 'node-string-pad'
-  process.stdout.write "intv\t"
-  intervals = harpman.getIntervals progression, octave, octaves
-  for interval in intervals
-    interval = (new Fraction interval).toString()
-    process.stdout.write "#{pad interval, 7, 'LEFT'}\t"
-  process.stdout.write "\n"
-  intervals
-
-steps() and notes() and holes() and intervals()
+harpmanCli.steps progression, octave, octaves
+harpmanCli.notes progression, tonality, octave, octaves
+harpmanCli.holes harpkey, progression, tonality, octave, octaves
+harpmanCli.intervals progression, octave, octaves
