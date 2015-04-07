@@ -3,8 +3,6 @@
 CSON = require 'cson'
 stepNames = CSON.requireFile 'data/steps.cson'
 harpman = require '../harpman'
-Fraction = (require 'fractional').Fraction
-pad = require 'pad'
 colors = require 'colors'
 argv = require 'yargs'
   .usage 'Usage: $0 [options]'
@@ -69,12 +67,13 @@ holes = () ->
   return
 
 intervals = () ->
+  Fraction = (require 'fractional').Fraction
+  pad = require 'node-string-pad'
   process.stdout.write "intv\t"
   intervals = harpman.getIntervals progression, octave, octaves
   for interval in intervals
     interval = (new Fraction interval).toString()
-    if interval.length is 5 then padding = 3 else padding = 5
-    process.stdout.write "#{pad padding, interval}\t"
+    process.stdout.write "#{pad interval, 7, 'LEFT'}\t"
   process.stdout.write "\n"
   return
 
