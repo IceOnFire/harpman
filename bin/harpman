@@ -2,9 +2,9 @@
 
 CSON = require 'cson'
 stepNames = CSON.requireFile 'data/steps.cson'
-progressions = CSON.requireFile 'data/progressions.cson'
 harpman = require '../harpman'
 Fraction = (require 'fractional').Fraction
+pad = require 'pad'
 colors = require 'colors'
 argv = require 'yargs'
   .usage 'Usage: $0 [options]'
@@ -35,38 +35,50 @@ print = (string, step = string) ->
   process.stdout.write "#{string}\t"
 
 harpkey = argv.k
-progression = argv.p
+progression = argv.p.split ' '
 tonality = argv.t or harpkey
-octaves = argv.o
-
-tokens = progression.split ' '
-progression = progressions
-progression = progression[token] for token in tokens
-
-[octave, octaves] = octaves.split '-'
+[octave, octaves] = argv.o.split '-'
 octave -= 1
 
-process.stdout.write "intv\t"
-intervals = harpman.getIntervals progression, octave, octaves
-for interval in intervals
-  interval = switch
-    when interval % 1 is 0 then "     #{interval}"
-    when interval // 1 is 0 then "    #{new Fraction(interval).toString()}"
-    else "  #{new Fraction(interval).toString()}"
-  process.stdout.write "#{interval}\t"
-process.stdout.write "\n"
+progression = do ->
+  progressions = CSON.requireFile 'data/progressions.cson'
+  tokens = progression
+  progression = progressions
+  progression = progression[token] for token in tokens
+  progression
 
-process.stdout.write "step\t"
-steps = harpman.getSteps progression, octave, octaves
-print step for step in steps
-process.stdout.write "\n"
+steps = () ->
+  process.stdout.write "step\t"
+  steps = harpman.getSteps progression, octave, octaves
+  print step for step in steps
+  process.stdout.write "\n"
+  steps
 
-process.stdout.write "note\t"
-notes = harpman.getNotes progression, tonality, octave, octaves
-print note, steps[i] for note, i in notes
-process.stdout.write "\n"
+notes = () ->
+  process.stdout.write "note\t"
+  notes = harpman.getNotes progression, tonality, octave, octaves
+  print note, steps[i] for note, i in notes
+  process.stdout.write "\n"
+  return
 
-process.stdout.write "hole\t"
-holes = harpman.getHoles harpkey, progression, tonality, octave, octaves
-print hole, steps[i] for hole, i in holes
-process.stdout.write "\n"
+holes = () ->
+  process.stdout.write "hole\t"
+  holes = harpman.getHoles harpkey, progression, tonality, octave, octaves
+  print hole, steps[i] for hole, i in holes
+  process.stdout.write "\n"
+  return
+
+intervals = () ->
+  process.stdout.write "intv\t"
+  intervals = harpman.getIntervals progression, octave, octaves
+  for interval in intervals
+    interval = (new Fraction interval).toString()
+    if interval.length is 5 then padding = 3 else padding = 5
+    process.stdout.write "#{pad padding, interval}\t"
+  process.stdout.write "\n"
+  return
+
+steps()
+notes()
+holes()
+intervals()

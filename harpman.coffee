@@ -1,5 +1,5 @@
 CSON = require 'cson'
-steps = CSON.requireFile './data/steps.cson'
+stepNames = CSON.requireFile './data/steps.cson'
 notes = CSON.requireFile './data/notes.cson'
 harp = CSON.requireFile './data/harp.cson'
 keys = CSON.requireFile './data/keys.cson'
@@ -15,12 +15,12 @@ harpman.getIntervals = (progression, octave, octaves) ->
   return intervals
 
 harpman.getSteps = (progression, octave, octaves) ->
-  theSteps = []
+  steps = []
   for o in [octave...octaves]
     for semitone in progression
-      theSteps.push steps[semitone]
-  theSteps.push steps[0]
-  return theSteps
+      steps.push stepNames[semitone]
+  steps.push stepNames[0]
+  return steps
 
 harpman.getNotes = (progression, tonality, octave, octaves) ->
   theNotes = []
